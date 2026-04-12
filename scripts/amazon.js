@@ -1,10 +1,10 @@
-import { cart} from '../data/cart.js';
+import { cart, saveToStorage } from '../data/cart.js';
 import { products } from '../data/products.js';
 import { formatCurrency } from "./utils/money.js";
 let productsHTML = '';
 products.forEach((product) => {
 
-    productsHTML += `<div class="product-container">
+  productsHTML += `<div class="product-container">
           <div class="product-image-container">
             <img class="product-image"
               src=${product.image}>
@@ -27,7 +27,7 @@ products.forEach((product) => {
           </div>
 
           <div class="product-quantity-container">
-            <select class="product-quantity-select">
+            <select class="product-quantity-select-${product.id}">
               <option selected value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -57,7 +57,7 @@ products.forEach((product) => {
 
 console.log(productsHTML);
 
-document.querySelector('.products-grid').innerHTML = productsHTML; 
+document.querySelector('.products-grid').innerHTML = productsHTML;
 
 document.querySelectorAll('.js-add-to-cart').forEach((button) => {
   button.addEventListener('click', () => {
@@ -67,26 +67,27 @@ document.querySelectorAll('.js-add-to-cart').forEach((button) => {
       if (productId === item.productId) {
         matchingItem = item;
       }
-    }); 
+    });
 
     if (matchingItem) {
-      matchingItem.quantity += parseInt(document.querySelector('.product-quantity-select').value);
+      matchingItem.quantity += parseInt(document.querySelector(`.product-quantity-select-${productId}`).value);
     } else {
       cart.push({
         productId: productId,
-        quantity: parseInt(document.querySelector('.product-quantity-select').value)
+        quantity: parseInt(document.querySelector(`.product-quantity-select-${productId}`).value)
       });
     }
+    saveToStorage();
 
     let cartQuantity = 0;
 
-    cart.forEach((item) =>{
+    cart.forEach((item) => {
       cartQuantity += item.quantity;
       document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
     });
 
- 
-    
+
+
 
 
   });
