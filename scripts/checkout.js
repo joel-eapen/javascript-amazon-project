@@ -1,4 +1,4 @@
-import { cart,removeFromCart } from '../data/cart.js';
+import { cart, removeFromCart } from '../data/cart.js';
 import { products } from '../data/products.js';
 import { formatCurrency } from './utils/money.js';
 
@@ -6,17 +6,17 @@ let cartSummaryHTML = '';
 
 cart.forEach((cartItem) => {
 
-    const productId = cartItem.productId;
-    let matchingProduct;
-    products.forEach((product) => {
-        if (productId === product.id) {
-            matchingProduct = product;
-        }
-    });
+  const productId = cartItem.productId;
+  let matchingProduct;
+  products.forEach((product) => {
+    if (productId === product.id) {
+      matchingProduct = product;
+    }
+  });
 
 
-    cartSummaryHTML +=
-        `
+  cartSummaryHTML +=
+    `
     <div class="cart-item-container 
     js-cart-item-container-${matchingProduct.id}">
             <div class="delivery-date">
@@ -94,16 +94,36 @@ cart.forEach((cartItem) => {
             </div>
           </div>`
 })
+let cartQuantity = 0;
+cart.forEach((item) => {
+  cartQuantity += item.quantity;
+  document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
+});
+document.querySelector('.js-checkout-quantity')
+          .innerHTML = `
+  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
 
-console.log(cartSummaryHTML);
 
 document.querySelector('.order-summary').innerHTML = cartSummaryHTML;
 
-document.querySelectorAll('.js-delete-link').forEach((link)=>{
-    link.addEventListener('click', () => {
-        const productId = link.dataset.productId;
-        removeFromCart(productId);
-       const container = document.querySelector(`.js-cart-item-container-${productId}`);
-       container.remove();  
-    });
+document.querySelectorAll('.js-delete-link').forEach((link) => {
+  link.addEventListener('click', () => {
+    const productId = link.dataset.productId;
+    cart.forEach((item) => {
+      if (productId === item.productId) {
+        cartQuantity -= item.quantity;
+        console.log(cartQuantity);
+        document.querySelector('.js-checkout-quantity')
+          .innerHTML = `
+  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
+      }
+    })
+    removeFromCart(productId);
+    const container = document.querySelector(`.js-cart-item-container-${productId}`);
+    container.remove();
+  });
 });
+
+
+
+
