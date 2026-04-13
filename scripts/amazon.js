@@ -74,7 +74,8 @@ document.querySelectorAll('.js-add-to-cart').forEach((button) => {
     } else {
       cart.push({
         productId: productId,
-        quantity: parseInt(document.querySelector(`.product-quantity-select-${productId}`).value)
+        quantity: parseInt(document.querySelector(`.product-quantity-select-${productId}`).value),
+        deliveryOptionId: '1'
       });
     }
     saveToStorage();
