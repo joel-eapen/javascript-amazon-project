@@ -226,3 +226,11 @@
 .is-editing-quantity .js-save{
   display: initial;
 }
+
+.is-editing-quantity .quantity-label{
+  display: none;
+}
+
+.is-editing-quantity .update-quantity-text{
+  display: none;
+}

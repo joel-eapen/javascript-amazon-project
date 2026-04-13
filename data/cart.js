@@ -24,3 +24,16 @@ export function removeFromCart(productId){
     cart = newCart;
     saveToStorage();
 }
+
+export function updateQuantity(productId, newQuantity){
+    let updatedQuantity = 0;
+    cart.forEach((item)=>{
+        if(item.productId === productId){
+            item.quantity = newQuantity;
+
+        }
+    })
+    saveToStorage();
+    return updatedQuantity;
+    
+}
