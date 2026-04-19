@@ -1,37 +1,37 @@
-import { cart, removeFromCart, saveToStorage, updateQuantity } from '../data/cart.js';
+import { cart, removeFromCart, saveToStorage, updateQuantity, updateDeliveryOption } from '../data/cart.js';
 import { products } from '../data/products.js';
 import { formatCurrency } from './utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
 import { deliveryOption } from '../data/deliveryOptions.js';
 
+function renderOrderSummary() {
+  let cartSummaryHTML = '';
 
-let cartSummaryHTML = '';
+  cart.forEach((cartItem) => {
 
-cart.forEach((cartItem) => {
+    const productId = cartItem.productId;
+    let matchingProduct;
+    products.forEach((product) => {
+      if (productId === product.id) {
+        matchingProduct = product;
+      }
+    });
 
-  const productId = cartItem.productId;
-  let matchingProduct;
-  products.forEach((product) => {
-    if (productId === product.id) {
-      matchingProduct = product;
-    }
-  });
+    const deliverOptionId = cartItem.deliveryOptionId;
+    let matchingDeliveryOption;
+    deliveryOption.forEach((option) => {
+      if (deliverOptionId === option.id) {
+        matchingDeliveryOption = option;
+      }
+    })
+    const today = dayjs();
+    const deliveryDate = today.add(matchingDeliveryOption.deliveryDays, 'days');
+    const dateString = deliveryDate.format('dddd, MMMM D');
 
-  const deliverOptionId = cartItem.deliveryOptionId;
-  let matchingDeliveryOption;
-  deliveryOption.forEach((option)=>{
-    if (deliverOptionId === option.id){
-      matchingDeliveryOption = option;
-    }
-  })
-const today = dayjs();
-const deliveryDate = today.add(matchingDeliveryOption.deliveryDays,'days');
-const dateString = deliveryDate.format('dddd, MMMM D');
-
-  cartSummaryHTML +=
-    `
+    cartSummaryHTML +=
+      `
     <div class="cart-item-container js-cart-item-container-${matchingProduct.id}">
-            <div class="delivery-date">
+            <div class="delivery-date  js-delivery-date-${matchingProduct.id}">
               Delivery date: ${dateString}
             </div>
 
@@ -67,21 +67,21 @@ const dateString = deliveryDate.format('dddd, MMMM D');
                 </div>
                 
                 
-                ${deliveryOptionHTML(matchingProduct,cartItem)}
+                ${deliveryOptionHTML(matchingProduct, cartItem)}
               </div>
             </div>
           </div>`
-})
+  })
 
-function deliveryOptionHTML(matchingProduct,cartItem){ 
-  let deliveryHTML = '';
-  deliveryOption.forEach((deliveryOption) => {
-    const today = dayjs();
-    const deliveryDate = today.add(deliveryOption.deliveryDays,'days');
-    const dateString = deliveryDate.format('dddd, MMMM D');
-    const isChecked = deliveryOption.id === cartItem.deliveryOptionId
-    deliveryHTML +=
-    `<div class="delivery-option">
+  function deliveryOptionHTML(matchingProduct, cartItem) {
+    let deliveryHTML = '';
+    deliveryOption.forEach((deliveryOption) => {
+      const today = dayjs();
+      const deliveryDate = today.add(deliveryOption.deliveryDays, 'days');
+      const dateString = deliveryDate.format('dddd, MMMM D');
+      const isChecked = deliveryOption.id === cartItem.deliveryOptionId
+      deliveryHTML +=
+        `<div class="delivery-option js-delivery-option" data-product-id="${matchingProduct.id}" data-delivery-option-id="${deliveryOption.id}">
         <input type="radio" 
         ${isChecked ? 'checked' : ''}
           class="delivery-option-input"
@@ -96,71 +96,84 @@ function deliveryOptionHTML(matchingProduct,cartItem){
         </div>
       </div>
     `
-    
+
+    });
+    return deliveryHTML;
+  }
+  let cartQuantity = 0;
+  cart.forEach((item) => {
+    cartQuantity += item.quantity;
+    document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
   });
-  return deliveryHTML;
+  document.querySelector('.js-checkout-quantity')
+    .innerHTML = `
+  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
+
+
+  document.querySelector('.order-summary').innerHTML = cartSummaryHTML;
+
+  document.querySelectorAll('.js-delete-link').forEach((link) => {
+    link.addEventListener('click', () => {
+      const productId = link.dataset.productId;
+      cart.forEach((item) => {
+        if (productId === item.productId) {
+          cartQuantity -= item.quantity;
+          console.log(cartQuantity);
+          document.querySelector('.js-checkout-quantity')
+            .innerHTML = `
+  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
+        }
+      })
+      removeFromCart(productId);
+      const container = document.querySelector(`.js-cart-item-container-${productId}`);
+      container.remove();
+    });
+  });
+
+
+
+
+  document.querySelectorAll('.js-update').forEach((update) => {
+    update.addEventListener('click', () => {
+      const productId = update.dataset.productId;
+      const container = document.querySelector(`.js-cart-item-container-${productId}`);
+      if (container) {
+        container.classList.add('is-editing-quantity');
+      }
+
+    })
+  });
+
+  document.querySelectorAll('.js-save').forEach((save) => {
+    save.addEventListener('click', () => {
+      const productId = save.dataset.productId;
+      console.log(productId);
+      let newQuantity = document.querySelector(`.js-qauntity-input-${productId}`).value;
+
+      updateQuantity(productId, parseInt(newQuantity));
+      cart.forEach((item) => {
+        if (item.productId === productId) {
+          cartQuantity += parseInt(newQuantity);
+
+          console.log(cartQuantity);
+          document.querySelector('.js-checkout-quantity')
+            .innerHTML = `
+  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
+        }
+      })
+
+    })
+  });
+
+  document.querySelectorAll('.js-delivery-option').forEach((option) => {
+    option.addEventListener('click', () => {
+      const productId = option.dataset.productId;
+      const deliveryOptionId = option.dataset.deliveryOptionId;
+      updateDeliveryOption(productId, deliveryOptionId);
+      renderOrderSummary();
+
+    })
+  });
 }
-let cartQuantity = 0;
-cart.forEach((item) => {
-  cartQuantity += item.quantity;
-  document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
-});
-document.querySelector('.js-checkout-quantity')
-  .innerHTML = `
-  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
 
-
-document.querySelector('.order-summary').innerHTML = cartSummaryHTML;
-
-document.querySelectorAll('.js-delete-link').forEach((link) => {
-  link.addEventListener('click', () => {
-    const productId = link.dataset.productId;
-    cart.forEach((item) => {
-      if (productId === item.productId) {
-        cartQuantity -= item.quantity;
-        console.log(cartQuantity);
-        document.querySelector('.js-checkout-quantity')
-          .innerHTML = `
-  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
-      }
-    })
-    removeFromCart(productId);
-    const container = document.querySelector(`.js-cart-item-container-${productId}`);
-    container.remove();
-  });
-});
-
-
-
-
-document.querySelectorAll('.js-update').forEach((update) => {
-  update.addEventListener('click', () => {
-    const productId = update.dataset.productId;
-    const container = document.querySelector(`.js-cart-item-container-${productId}`);
-    if (container) {
-      container.classList.add('is-editing-quantity');
-    }
-
-  })
-});
-
-document.querySelectorAll('.js-save').forEach((save) => {
-  save.addEventListener('click', () => {
-    const productId = save.dataset.productId;
-    console.log(productId);
-    let newQuantity = document.querySelector(`.js-qauntity-input-${productId}`).value;
-
-    updateQuantity(productId, parseInt(newQuantity));
-    cart.forEach((item) => {
-      if (item.productId === productId) {
-        cartQuantity +=parseInt(newQuantity) ;
-        
-        console.log(cartQuantity);
-        document.querySelector('.js-checkout-quantity')
-          .innerHTML = `
-  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
-      }
-    })
-
-  })
-})
+renderOrderSummary();
