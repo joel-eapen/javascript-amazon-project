@@ -1,3 +1,5 @@
+
+
 export let cart = JSON.parse(localStorage.getItem('cart'));
 if(!cart){
     cart =[{
@@ -51,4 +53,12 @@ export function updateDeliveryOption(productId, deliveryOptionId){
     saveToStorage();
     return 7;
 
+};
+
+export function itemUpdate(){
+    let cartQuantity = 0;
+    cart.forEach((item) => {
+    cartQuantity += item.quantity;
+    document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
+  });
 }

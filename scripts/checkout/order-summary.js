@@ -1,8 +1,10 @@
-import { cart, removeFromCart, saveToStorage, updateQuantity, updateDeliveryOption } from '../../data/cart.js';
-import { products } from '../../data/products.js';
+import { cart, removeFromCart, saveToStorage, updateQuantity, updateDeliveryOption,itemUpdate } from '../../data/cart.js';
+import { products, getProduct } from '../../data/products.js';
 import { formatCurrency } from '../utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
-import { deliveryOption } from '../../data/deliveryOptions.js';
+import { deliveryOption,getDeliveryOption } from '../../data/deliveryOptions.js';
+
+
 
 export function renderOrderSummary() {
   let cartSummaryHTML = '';
@@ -10,20 +12,10 @@ export function renderOrderSummary() {
   cart.forEach((cartItem) => {
 
     const productId = cartItem.productId;
-    let matchingProduct;
-    products.forEach((product) => {
-      if (productId === product.id) {
-        matchingProduct = product;
-      }
-    });
+    const matchingProduct = getProduct(productId);
 
     const deliverOptionId = cartItem.deliveryOptionId;
-    let matchingDeliveryOption;
-    deliveryOption.forEach((option) => {
-      if (deliverOptionId === option.id) {
-        matchingDeliveryOption = option;
-      }
-    })
+    const matchingDeliveryOption = getDeliveryOption(deliverOptionId);  
     const today = dayjs();
     const deliveryDate = today.add(matchingDeliveryOption.deliveryDays, 'days');
     const dateString = deliveryDate.format('dddd, MMMM D');
@@ -101,12 +93,12 @@ export function renderOrderSummary() {
     return deliveryHTML;
   }
   let cartQuantity = 0;
-  cart.forEach((item) => {
-    cartQuantity += item.quantity;
-    document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
-  });
+    cart.forEach((item) => {
+        cartQuantity += item.quantity;
+        
+    });
   document.querySelector('.js-checkout-quantity')
-    .innerHTML = `
+        .innerHTML = `
   Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
 
 
@@ -151,19 +143,9 @@ export function renderOrderSummary() {
       let newQuantity = document.querySelector(`.js-qauntity-input-${productId}`).value;
 
       updateQuantity(productId, parseInt(newQuantity));
-      cart.forEach((item) => {
-        if (item.productId === productId) {
-          cartQuantity += parseInt(newQuantity);
-
-          console.log(cartQuantity);
-          document.querySelector('.js-checkout-quantity')
-            .innerHTML = `
-  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
+      renderOrderSummary();
         }
-      })
-
-    })
-  });
+      )});
 
   document.querySelectorAll('.js-delivery-option').forEach((option) => {
     option.addEventListener('click', () => {
@@ -174,5 +156,7 @@ export function renderOrderSummary() {
 
     })
   });
-}
+};
+
+
 
