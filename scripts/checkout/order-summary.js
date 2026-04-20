@@ -4,6 +4,7 @@ import { formatCurrency } from '../utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
 import { deliveryOption,getDeliveryOption } from '../../data/deliveryOptions.js';
 import { renderPaymentSummary } from './payment-summary.js';
+import { renderCheckoutHeader } from './checkoutHeader.js';
 
 
 
@@ -93,29 +94,13 @@ export function renderOrderSummary() {
     });
     return deliveryHTML;
   }
-  let cartQuantity = 0;
-    cart.forEach((item) => {
-        cartQuantity += item.quantity;
-        
-    });
-  document.querySelector('.js-checkout-quantity')
-        .innerHTML = `
-  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
-
-
+  renderCheckoutHeader();
   document.querySelector('.order-summary').innerHTML = cartSummaryHTML;
 
   document.querySelectorAll('.js-delete-link').forEach((link) => {
     link.addEventListener('click', () => {
       const productId = link.dataset.productId;
-      cart.forEach((item) => {
-        if (productId === item.productId) {
-          cartQuantity -= item.quantity;
-          document.querySelector('.js-checkout-quantity')
-            .innerHTML = `
-  Checkout (<a class="return-to-home-link" href="amazon.html" class="js-checkout-quantity">${cartQuantity} items</a>)`;
-        }
-      })
+      renderCheckoutHeader(productId)
       removeFromCart(productId);
       const container = document.querySelector(`.js-cart-item-container-${productId}`);
       container.remove();
@@ -162,5 +147,6 @@ export function renderOrderSummary() {
   });
 };
 
+ 
 
 
