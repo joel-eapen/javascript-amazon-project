@@ -5,7 +5,6 @@ export function renderCheckoutHeader(productId) {
     let cartQuantity = 0;
     cart.forEach((item) => {
         cartQuantity += item.quantity;
-        console.log(cartQuantity);
         if (productId === item.productId) {
         cartQuantity -= item.quantity;
     }

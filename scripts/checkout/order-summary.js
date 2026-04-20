@@ -1,10 +1,11 @@
-import { cart, removeFromCart, saveToStorage, updateQuantity, updateDeliveryOption,itemUpdate } from '../../data/cart.js';
+import { cart, removeFromCart, saveToStorage, updateQuantity, updateDeliveryOption, itemUpdate } from '../../data/cart.js';
 import { products, getProduct } from '../../data/products.js';
 import { formatCurrency } from '../utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
-import { deliveryOption,getDeliveryOption } from '../../data/deliveryOptions.js';
+import { deliveryOption, getDeliveryOption } from '../../data/deliveryOptions.js';
 import { renderPaymentSummary } from './payment-summary.js';
 import { renderCheckoutHeader } from './checkoutHeader.js';
+import { renderDeliveryOptions } from '../../data/deliveryOptions.js';
 
 
 
@@ -17,10 +18,9 @@ export function renderOrderSummary() {
     const matchingProduct = getProduct(productId);
 
     const deliverOptionId = cartItem.deliveryOptionId;
-    const matchingDeliveryOption = getDeliveryOption(deliverOptionId);  
-    const today = dayjs();
-    const deliveryDate = today.add(matchingDeliveryOption.deliveryDays, 'days');
-    const dateString = deliveryDate.format('dddd, MMMM D');
+    const matchingDeliveryOption = getDeliveryOption(deliverOptionId);
+    const dateString = renderDeliveryOptions(matchingDeliveryOption);
+
 
     cartSummaryHTML +=
       `
@@ -65,14 +65,14 @@ export function renderOrderSummary() {
               </div>
             </div>
           </div>`
-  })
+  });
+
 
   function deliveryOptionHTML(matchingProduct, cartItem) {
     let deliveryHTML = '';
     deliveryOption.forEach((deliveryOption) => {
-      const today = dayjs();
-      const deliveryDate = today.add(deliveryOption.deliveryDays, 'days');
-      const dateString = deliveryDate.format('dddd, MMMM D');
+
+      const dateString = renderDeliveryOptions(deliveryOption);
       const isChecked = deliveryOption.id === cartItem.deliveryOptionId
       deliveryHTML +=
         `<div class="delivery-option js-delivery-option" data-product-id="${matchingProduct.id}" data-delivery-option-id="${deliveryOption.id}">
@@ -132,8 +132,9 @@ export function renderOrderSummary() {
       updateQuantity(productId, parseInt(newQuantity));
       renderPaymentSummary();
       renderOrderSummary();
-        }
-      )});
+    }
+    )
+  });
 
   document.querySelectorAll('.js-delivery-option').forEach((option) => {
     option.addEventListener('click', () => {
@@ -147,6 +148,6 @@ export function renderOrderSummary() {
   });
 };
 
- 
+
 
 
