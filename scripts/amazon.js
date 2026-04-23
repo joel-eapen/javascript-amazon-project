@@ -26,6 +26,8 @@ products.forEach((product) => {
             $${product.getPrice()}
           </div>
 
+          ${product.extraInfoHTML()}
+
           <div class="product-quantity-container">
             <select class="product-quantity-select-${product.id}">
               <option selected value="1">1</option>
