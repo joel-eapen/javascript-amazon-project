@@ -72,13 +72,3 @@ class Cart {
 }
 
 
-const cart = new Cart('cart-oop');
-
-const businessCart = new Cart('business-cart');
-
-
-cart.removeFromCart("e43638ce-6aa0-4b85-b27f-e1d07eb678c6");
-console.log(businessCart);
-console.log(cart);
-
-console.log(businessCart instanceof Cart);
