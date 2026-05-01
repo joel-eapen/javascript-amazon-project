@@ -74,10 +74,20 @@ export function renderPaymentSummary() {
         cart: cart
       })
     })
-    const order = await response.json();
+  const order = await response.json();
     addOrder(order);
+    let matchingItem;
+    console.log(order.products);
+    order.products.forEach((product)=>{
+      products.forEach((item)=>{
+        if(product.productId === item.id){
+          matchingItem = item;
+        }
+      })
+      console.log(matchingItem);
+    })
 
-    window.location.href = 'orders.html';
+   window.location.href = 'orders.html';
   });
 
 
